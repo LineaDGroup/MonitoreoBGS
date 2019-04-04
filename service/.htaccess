@@ -1,0 +1,6 @@
+# Activar RewriteEngine
+RewriteEngine on
+
+RewriteRule ^persist persist.php    [NC,L,QSA]
+
+#ErrorDocument 404 /index.php 
