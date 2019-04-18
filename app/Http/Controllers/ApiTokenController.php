@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Camara;
 use App\Estadistica;
 use App\ZonaHoraria;
+use App\Sesion;
 use App\Centro;
 use App\User;
 
@@ -33,28 +34,55 @@ class ApiTokenController extends Controller
         return response()->json(['msg' => true],200);
     }
 
-    public function centros(Request $request)
+    public function estadisticas(Request $request)
     {
-        $from = $request->from;
-        $to = $request->to;
+        $from = $request->dateRange['startDate'];
+        $to = $request->dateRange['endDate'];
+        // dd($request->userId);
+        $estadisticas = [];
         if (isset($from, $to)) {
-            $centros = Centro::select('id','descripcion')
-            ->with(['camaras.estadisticas' => function($q) use ($from, $to) {
-                $q->whereRaw("created_at >= ? AND created_at <= ?", 
-                array($from." 00:00:00", $to." 23:59:59"));
+            $estadisticas = Estadistica::select('id','id_bio_camara','voltaje','consumo','created_at')
+            ->whereRaw("created_at >= ? AND created_at <= ?", array($from." 00:00:00", $to." 23:59:59"))
+            ->whereHas('camara', function($q) use ($request) {
+                $q->where('id_cms_users',$request->userId);
+            })
+            ->with(['camara' => function($q) use ($request) {
+                $q->select('id','id_cms_users','nombre')->where('id_cms_users',$request->userId);;
             }])
-            // ->whereHas('camaras.estadisticas', function ($q) use ($from, $to) {
-            //     // $q->select('id_bio_camara','voltaje','consumo','ip','created_at')->whereBetween('created_at', [$from, $to]);
-            //     $q->whereRaw("created_at >= ? AND created_at <= ?", 
-            //     array($from." 00:00:00", $to." 23:59:59"));
-            // })
+            ->withCount('sesiones')
             ->get();
         } else {
-            $centros = Centro::with('camaras.estadisticas')
-            ->whereHas('camaras.estadisticas')            
-            ->count();
+            $estadisticas = Estadistica::select('id','id_bio_camara','voltaje','consumo','created_at')
+            ->whereHas('camara', function($q) use ($request) {
+                $q->where('id_cms_users',$request->userId);
+            })
+            ->with(['camara' => function($q) use ($request) {
+                $q->select('id','id_cms_users','nombre')->where('id_cms_users',$request->userId);;
+            }])
+            ->withCount('sesiones')
+            ->get();
         }
-        return response()->json(['centros' => $centros]);
+        $schema = array(array('name' => 'camara','dataType' => 'STRING'),
+                        array('name'=> 'fecha','dataType' => 'STRING'),
+                        array('name'=> 'sesiones','dataType' => 'NUMBER'),
+                        array('name'=> 'fallas','dataType' => 'NUMBER'),
+                        array('name'=> 'amperaje','dataType' => 'NUMBER'),
+                        array('name'=> 'voltaje','dataType' => 'NUMBER'),
+                        array('name'=> 'fallasVoltaje','dataType' => 'NUMBER'),
+                        array('name'=> 'horasUso','dataType' => 'NUMBER')
+        ); 
+
+        $rows = array();
+        foreach ($estadisticas as $key => $value) {
+        //    $value->camara = $value->camara->nombre;
+           $array = $value->toArray();
+           $array['camara'] = $value->camara->nombre;  
+           $v = array('values' => array_values($array));
+           array_push($rows,$v);
+        }
+        $data = array('schema' => $schema,'rows' => $rows);
+
+        return response()->json(['estadisticas' => $data]);
     }
 
     public function usuarios()

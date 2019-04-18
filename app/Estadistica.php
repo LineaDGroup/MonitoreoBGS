@@ -18,8 +18,24 @@ class Estadistica extends Model
         'free'
     ];
 
+    protected $with = [];
+
+    // protected $appends = ['countSesiones'];
+
     public function camara()
     {
         return $this->belongsTo('App\Camara','id_bio_camara');
     }
+
+    public function sesiones()
+    {
+        return $this->hasMany('App\Sesion','id_bio_estadistica');
+    }
+
+    public function getCountSesionesAttribute() 
+    {
+        return $this->sesiones->count();
+    }
+
+
 }

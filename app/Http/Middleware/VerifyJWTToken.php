@@ -18,12 +18,16 @@ class VerifyJWTToken
     public function handle($request, Closure $next)
     {
         try{
-            $token = User::where('api_token',$request->token)->first();
-            if(!$token) {
+            if(!$request->has('token')) {
+                return response()->json(['token not sended'],422);
+            }
+            $user = User::where('api_token',$request->token)->first();
+            $request->userId = $user->id; 
+            if(!$user) {
                 return response()->json(['token invalid'],422);
             }
         }catch (\Exception $e) {
-            return response()->json(['token_invalid'], $e->getStatusCode());
+            return response()->json(['token_invalid'], 500);
         }
        return $next($request);
     }
