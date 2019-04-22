@@ -26,13 +26,26 @@ class ApiTokenController extends Controller
     public function login(Request $request)
     {
         if (!isset($request->email, $request->token)) {
-            return response()->json(['email or token not send'], 422);
+            $object = collect([
+                'status' => false,
+                'msg' => 'Login Failed',
+            ]);
+            return response()->json($object, 401);
         }
         $user = User::where('email', $request->email)->where('api_token', $request->token)->first();
         if (!$user) {
-            return response()->json(['email or token invalid'], 422);
+            $object = collect([
+                'status' => false,
+                'msg' => 'Login Failed',
+            ]);
+            return response()->json($object, 401);
         }
-        return response()->json(['msg' => true], 200);
+        // $object = new stdClass;
+        $object = collect([
+            'status' => true,
+            'msg' => 'Login OK',
+        ]);
+        return response()->json($object, 200);
     }
 
     public function estadisticas(Request $request)
