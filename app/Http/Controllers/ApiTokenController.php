@@ -105,9 +105,15 @@ class ApiTokenController extends Controller
             //    $v = array('values' => array_values($array));
             array_push($rows, $ar);
         }
-        $data = array('schema' => $schema, 'rows' => $rows);
+        $object = collect([
+            'schema' => $schema,
+            'rows' => $rows,
+            'cachedData' => false
+        ]);
+        // $data = array('schema' => $schema, 'rows' => $rows,'cachedData' => false);
 
-        return response()->json(['estadisticas' => $data]);
+
+        return response()->json($object,200);
     }
 
     public function usuarios()
