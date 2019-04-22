@@ -50,6 +50,7 @@ class ApiTokenController extends Controller
 
     public function estadisticas(Request $request)
     {
+        \Log::info($request);
         $from = $request->dateRange['startDate'];
         $to = $request->dateRange['endDate'];
         // dd($request->userId);
