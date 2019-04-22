@@ -76,23 +76,28 @@ class ApiTokenController extends Controller
                 ->withCount('sesiones')
                 ->get();
         }
-        $schema = array(
-            array('name' => 'camara', 'dataType' => 'STRING'),
-            array('name' => 'fecha', 'dataType' => 'STRING'),
-            array('name' => 'sesiones', 'dataType' => 'NUMBER'),
-            array('name' => 'fallas', 'dataType' => 'NUMBER'),
-            array('name' => 'amperaje', 'dataType' => 'NUMBER'),
-            array('name' => 'voltaje', 'dataType' => 'NUMBER'),
-            array('name' => 'fallasVoltaje', 'dataType' => 'NUMBER'),
-            array('name' => 'horasUso', 'dataType' => 'NUMBER')
-        );
+        $schema = array();
+        foreach ($request->fields as $key => $value) {
+            $type = $this->getDataType($value['name']);
+            array_push($schema,array('name' => $value['name'], 'dataType' => $type));
+        }; 
+        // array(
+        //     array('name' => 'camara', 'dataType' => 'STRING'),
+        //     array('name' => 'fecha', 'dataType' => 'STRING'),
+        //     array('name' => 'sesiones', 'dataType' => 'NUMBER'),
+        //     array('name' => 'fallas', 'dataType' => 'NUMBER'),
+        //     array('name' => 'amperaje', 'dataType' => 'NUMBER'),
+        //     array('name' => 'voltaje', 'dataType' => 'NUMBER'),
+        //     array('name' => 'fallasVoltaje', 'dataType' => 'NUMBER'),
+        //     array('name' => 'horasUso', 'dataType' => 'NUMBER')
+        // );
 
         $rows = array();
         foreach ($estadisticas as $key => $value) {
             //    $value->camara = $value->camara->nombre;
             $array = $value->toArray();
             $array['camara'] = $value->camara->nombre;
-            $array['created_at'] = Carbon::createFromTimeString($value->created_at)->format('YmdH');
+            $array['fecha'] = Carbon::createFromTimeString($value->created_at)->format('YmdH');
             $array = array_map('strval', $array);
             //    dd( array_values($request->fields));
             $ar = $this->getOrderedArray($array, array_values($request->fields));
@@ -143,5 +148,17 @@ class ApiTokenController extends Controller
             }
         }
         return $lst;
+    }
+
+    protected function getDataType($field)
+    {
+        // var_dump($field);
+        // $d = '';
+        if($field == 'camara' || $field == 'fecha') {
+            return "STRING";
+        } elseif ($field == 'sesiones_count' || $field == 'fallas' || $field == 'amperaje' || $field == 'voltaje' || $field == 'fallasVoltaje' || $field == 'horasUso') {
+            return 'NUMBER';
+        }
+        return '';
     }
 }
