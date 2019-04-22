@@ -102,8 +102,8 @@ class ApiTokenController extends Controller
             $array = array_map('strval', $array);
             //    dd( array_values($request->fields));
             $ar = $this->getOrderedArray($array, array_values($request->fields));
-            //    $v = array('values' => array_values($array));
-            array_push($rows, $ar);
+            $v = array('values' => $ar);
+            array_push($rows, $v);
         }
         $object = collect([
             'schema' => $schema,
