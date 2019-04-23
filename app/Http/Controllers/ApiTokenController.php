@@ -161,7 +161,13 @@ class ApiTokenController extends Controller
         // $d = '';
         if($field == 'camara' || $field == 'fecha' || $field == 'centro') {
             return "STRING";
-        } elseif ($field == 'sesiones_count' || $field == 'fallas' || $field == 'amperaje' || $field == 'voltaje' || $field == 'fallasVoltaje' || $field == 'horasUso') {
+        } elseif ($field == 'sesiones_count' || 
+                  $field == 'fallas' || 
+                  $field == 'consumo' || 
+                  $field == 'amperaje' || 
+                  $field == 'voltaje' || 
+                  $field == 'fallasVoltaje' || 
+                  $field == 'horasUso') {
             return 'NUMBER';
         }
         return '';
