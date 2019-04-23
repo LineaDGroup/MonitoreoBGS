@@ -77,6 +77,9 @@ class ApiTokenController extends Controller
                 ->with(['camara' => function ($q) use ($request) {
                     $q->select('id', 'id_cms_users', 'nombre')->where('id_cms_users', $request->userId);
                 }])
+                ->with(['camara.centro' => function ($q) {
+                    $q->select('id','descripcion');
+                }])
                 ->withCount('sesiones')
                 ->get();
         }
@@ -156,7 +159,7 @@ class ApiTokenController extends Controller
     {
         // var_dump($field);
         // $d = '';
-        if($field == 'camara' || $field == 'fecha') {
+        if($field == 'camara' || $field == 'fecha' || $field == 'centro') {
             return "STRING";
         } elseif ($field == 'sesiones_count' || $field == 'fallas' || $field == 'amperaje' || $field == 'voltaje' || $field == 'fallasVoltaje' || $field == 'horasUso') {
             return 'NUMBER';
