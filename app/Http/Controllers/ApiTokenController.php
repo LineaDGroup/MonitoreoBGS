@@ -62,7 +62,10 @@ class ApiTokenController extends Controller
                     $q->where('id_cms_users', $request->userId);
                 })
                 ->with(['camara' => function ($q) use ($request) {
-                    $q->select('id', 'id_cms_users', 'nombre')->where('id_cms_users', $request->userId);;
+                    $q->select('id', 'id_cms_users', 'nombre','id_bio_centro')->where('id_cms_users', $request->userId);
+                }])
+                ->with(['camara.centro' => function ($q) {
+                    $q->select('id','descripcion');
                 }])
                 ->withCount('sesiones')
                 ->get();
@@ -72,7 +75,7 @@ class ApiTokenController extends Controller
                     $q->where('id_cms_users', $request->userId);
                 })
                 ->with(['camara' => function ($q) use ($request) {
-                    $q->select('id', 'id_cms_users', 'nombre')->where('id_cms_users', $request->userId);;
+                    $q->select('id', 'id_cms_users', 'nombre')->where('id_cms_users', $request->userId);
                 }])
                 ->withCount('sesiones')
                 ->get();
@@ -81,24 +84,16 @@ class ApiTokenController extends Controller
         foreach ($request->fields as $key => $value) {
             $type = $this->getDataType($value['name']);
             array_push($schema,array('name' => $value['name'], 'dataType' => $type));
-        }; 
-        // array(
-        //     array('name' => 'camara', 'dataType' => 'STRING'),
-        //     array('name' => 'fecha', 'dataType' => 'STRING'),
-        //     array('name' => 'sesiones', 'dataType' => 'NUMBER'),
-        //     array('name' => 'fallas', 'dataType' => 'NUMBER'),
-        //     array('name' => 'amperaje', 'dataType' => 'NUMBER'),
-        //     array('name' => 'voltaje', 'dataType' => 'NUMBER'),
-        //     array('name' => 'fallasVoltaje', 'dataType' => 'NUMBER'),
-        //     array('name' => 'horasUso', 'dataType' => 'NUMBER')
-        // );
+        };
 
         $rows = array();
         foreach ($estadisticas as $key => $value) {
             //    $value->camara = $value->camara->nombre;
             $array = $value->toArray();
             $array['camara'] = $value->camara->nombre;
-            $array['fecha'] = Carbon::createFromTimeString($value->created_at)->format('YmdH');
+            $array['centro'] = $value->camara->centro->descripcion;
+            $array['fecha'] = Carbon::createFromTimeString($value->created_at)->format('Ymd');
+            $array['hora'] = Carbon::createFromTimeString($value->created_at)->format('H');
             $array = array_map('strval', $array);
             //    dd( array_values($request->fields));
             $ar = $this->getOrderedArray($array, array_values($request->fields));
