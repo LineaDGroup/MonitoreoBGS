@@ -58,7 +58,7 @@ class ApiTokenController extends Controller
         $rows = array();
 
 
-        if (in_array(array('name' => "voltaje"), $request->fields) || in_array(array('name' => "consumo"), $request->fields)) {
+        if (in_array(array('name' => "voltaje"), $request->fields) || in_array(array('name' => "sesiones_count"), $request->fields) || in_array(array('name' => "consumo"), $request->fields)) {
             $estadisticas = [];
             if (isset($from, $to)) {
                 $estadisticas = Estadistica::select('id', 'id_bio_camara', 'voltaje', 'consumo', 'created_at')
@@ -121,7 +121,7 @@ class ApiTokenController extends Controller
                 array_push($rows, $v);
             }
         }
-        // return response()->json($reportesData, 200);
+        // return response()->json($estadisticas, 200);
 
         $schema = array();
         foreach ($request->fields as $key => $value) {
@@ -189,13 +189,12 @@ class ApiTokenController extends Controller
     {
         // var_dump($field);
         // $d = '';
-        if ($field == 'camara' || $field == 'fecha' || $field == 'centro') {
+        if ($field == 'camara' || $field == 'tiempo_uso' || $field == 'fecha' || $field == 'centro') {
             return "STRING";
         } elseif (
             $field == 'sesiones_count' ||
             $field == 'fallas' ||
             $field == 'consumo' ||
-            $field == 'tiempo_uso' ||
             $field == 'hora' ||
             $field == 'amperaje' ||
             $field == 'voltaje' ||
