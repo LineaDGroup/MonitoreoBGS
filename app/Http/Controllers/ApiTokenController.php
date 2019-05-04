@@ -90,19 +90,22 @@ class ApiTokenController extends Controller
         };
 
         $rows = array();
-        foreach ($estadisticas as $key => $value) {
-            //    $value->camara = $value->camara->nombre;
-            $array = $value->toArray();
-            $array['camara'] = $value->camara->nombre;
-            $array['centro'] = $value->camara->centro->descripcion;
-            // $array['consumo'] = NULL;
-            $array['fecha'] = Carbon::createFromTimeString($value->created_at)->format('Ymd');
-            $array['hora'] = Carbon::createFromTimeString($value->created_at)->format('H');
-            $array = array_map('strval', $array);
-            //    dd( array_values($request->fields));
-            $ar = $this->getOrderedArray($array, array_values($request->fields));
-            $v = array('values' => $ar);
-            array_push($rows, $v);
+        if( !((count($request->fields) == 1 && in_array(array('name' => "tiempo_uso"), $request->fields)) || 
+               (count($request->fields) == 2 && in_array(array('name' => "tiempo_uso"), $request->fields) && in_array(array('name' => "fecha"), $request->fields))) )  {
+            foreach ($estadisticas as $key => $value) {
+                //    $value->camara = $value->camara->nombre;
+                $array = $value->toArray();
+                $array['camara'] = $value->camara->nombre;
+                $array['centro'] = $value->camara->centro->descripcion;
+                // $array['consumo'] = NULL;
+                $array['fecha'] = Carbon::createFromTimeString($value->created_at)->format('Ymd');
+                $array['hora'] = Carbon::createFromTimeString($value->created_at)->format('H');
+                $array = array_map('strval', $array);
+                //    dd( array_values($request->fields));
+                $ar = $this->getOrderedArray($array, array_values($request->fields));
+                $v = array('values' => $ar);
+                array_push($rows, $v);
+            }
         }
 
         // ADDED DATA FROM STORE_PROCEDURE
@@ -112,13 +115,14 @@ class ApiTokenController extends Controller
                 $array = [];
                 sscanf($value->consumo_diario, "%d:%d:%d", $hours, $minutes, $seconds);
                 $time_seconds = isset($hours) ? $hours * 3600 + $minutes * 60 + $seconds : $minutes * 60 + $seconds;
-                $array['tiempo_uso'] = $time_seconds;
+                $array['tiempo_uso'] = strval($time_seconds);
+                $array['fecha'] = Carbon::createFromFormat('Y-m-d',$value->fecha)->format('Ymd');
                 $ar = $this->getOrderedArray($array, array_values($request->fields));
                 $v = array('values' => $ar);
                 array_push($rows, $v);
             }
         }
-        // return response()->json(in_array(array('name' => "consumo"), $request->fields),200);
+        // return response()->json($reportesData,200);
         $object = collect([
             'schema' => $schema,
             'rows' => $rows,
