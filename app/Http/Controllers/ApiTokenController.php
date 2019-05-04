@@ -54,44 +54,41 @@ class ApiTokenController extends Controller
         $from = $request->dateRange['startDate'];
         $to = $request->dateRange['endDate'];
         // dd($request->userId);
-        $estadisticas = [];
-        if (isset($from, $to)) {
-            $estadisticas = Estadistica::select('id', 'id_bio_camara', 'voltaje', 'consumo', 'created_at')
-                ->whereRaw("created_at >= ? AND created_at <= ?", array($from . " 00:00:00", $to . " 23:59:59"))
-                ->whereHas('camara', function ($q) use ($request) {
-                    $q->where('id_cms_users', $request->userId);
-                })
-                ->with(['camara' => function ($q) use ($request) {
-                    $q->select('id', 'id_cms_users', 'nombre','id_bio_centro')->where('id_cms_users', $request->userId);
-                }])
-                ->with(['camara.centro' => function ($q) {
-                    $q->select('id','descripcion');
-                }])
-                ->withCount('sesiones')
-                ->get();
-        } else {
-            $estadisticas = Estadistica::select('id', 'id_bio_camara', 'voltaje', 'consumo', 'created_at')
-                ->whereHas('camara', function ($q) use ($request) {
-                    $q->where('id_cms_users', $request->userId);
-                })
-                ->with(['camara' => function ($q) use ($request) {
-                    $q->select('id', 'id_cms_users', 'nombre')->where('id_cms_users', $request->userId);
-                }])
-                ->with(['camara.centro' => function ($q) {
-                    $q->select('id','descripcion');
-                }])
-                ->withCount('sesiones')
-                ->get();
-        }
-        $schema = array();
-        foreach ($request->fields as $key => $value) {
-            $type = $this->getDataType($value['name']);
-            array_push($schema,array('name' => $value['name'], 'dataType' => $type));
-        };
 
         $rows = array();
-        if( !((count($request->fields) == 1 && in_array(array('name' => "tiempo_uso"), $request->fields)) || 
-               (count($request->fields) == 2 && in_array(array('name' => "tiempo_uso"), $request->fields) && in_array(array('name' => "fecha"), $request->fields))) )  {
+
+
+        if (in_array(array('name' => "voltaje"), $request->fields) || in_array(array('name' => "consumo"), $request->fields)) {
+            $estadisticas = [];
+            if (isset($from, $to)) {
+                $estadisticas = Estadistica::select('id', 'id_bio_camara', 'voltaje', 'consumo', 'created_at')
+                    ->whereRaw("created_at >= ? AND created_at <= ?", array($from . " 00:00:00", $to . " 23:59:59"))
+                    ->whereHas('camara', function ($q) use ($request) {
+                        $q->where('id_cms_users', $request->userId);
+                    })
+                    ->with(['camara' => function ($q) use ($request) {
+                        $q->select('id', 'id_cms_users', 'nombre', 'id_bio_centro')->where('id_cms_users', $request->userId);
+                    }])
+                    ->with(['camara.centro' => function ($q) {
+                        $q->select('id', 'descripcion');
+                    }])
+                    ->withCount('sesiones')
+                    ->get();
+            } else {
+                $estadisticas = Estadistica::select('id', 'id_bio_camara', 'voltaje', 'consumo', 'created_at')
+                    ->whereHas('camara', function ($q) use ($request) {
+                        $q->where('id_cms_users', $request->userId);
+                    })
+                    ->with(['camara' => function ($q) use ($request) {
+                        $q->select('id', 'id_cms_users', 'nombre')->where('id_cms_users', $request->userId);
+                    }])
+                    ->with(['camara.centro' => function ($q) {
+                        $q->select('id', 'descripcion');
+                    }])
+                    ->withCount('sesiones')
+                    ->get();
+            }
+
             foreach ($estadisticas as $key => $value) {
                 //    $value->camara = $value->camara->nombre;
                 $array = $value->toArray();
@@ -109,20 +106,29 @@ class ApiTokenController extends Controller
         }
 
         // ADDED DATA FROM STORE_PROCEDURE
-        if(in_array(array('name' => "tiempo_uso"), $request->fields)) {
+        if (in_array(array('name' => "tiempo_uso"), $request->fields)) {
             $reportesData = json_decode($this->reportes($request->userId, $from, $to, '1'));
             foreach ($reportesData as $key => $value) {
                 $array = [];
                 sscanf($value->consumo_diario, "%d:%d:%d", $hours, $minutes, $seconds);
                 $time_seconds = isset($hours) ? $hours * 3600 + $minutes * 60 + $seconds : $minutes * 60 + $seconds;
                 $array['tiempo_uso'] = strval($time_seconds);
-                $array['fecha'] = Carbon::createFromFormat('Y-m-d',$value->fecha)->format('Ymd');
+                $array['camara'] = $value->nom_camara;
+                $array['centro'] = $value->desc_centro;
+                $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
                 $ar = $this->getOrderedArray($array, array_values($request->fields));
                 $v = array('values' => $ar);
                 array_push($rows, $v);
             }
         }
-        // return response()->json($reportesData,200);
+        // return response()->json($reportesData, 200);
+
+        $schema = array();
+        foreach ($request->fields as $key => $value) {
+            $type = $this->getDataType($value['name']);
+            array_push($schema, array('name' => $value['name'], 'dataType' => $type));
+        };
+
         $object = collect([
             'schema' => $schema,
             'rows' => $rows,
@@ -131,7 +137,7 @@ class ApiTokenController extends Controller
         // $data = array('schema' => $schema, 'rows' => $rows,'cachedData' => false);
 
 
-        return response()->json($object,200);
+        return response()->json($object, 200);
     }
 
     public function usuarios()
@@ -146,13 +152,13 @@ class ApiTokenController extends Controller
     protected function getOrderedArray($array, $order)
     {
         $orderedarray = [];
-        $ord = $this->array_values_recursive($order); 
+        $ord = $this->array_values_recursive($order);
         // dd();
         // return array_only($array, $ord);
-        foreach($ord as $key => $v) {
+        foreach ($ord as $key => $v) {
             // dd($v['name']);
             // $i = $v['name'];
-            if($array[$v] == NULL || $array[$v] == "") {
+            if ($array[$v] == NULL || $array[$v] == "") {
                 $orderedarray[$key] = NULL;
             } else {
                 $orderedarray[$key] = $array[$v];
@@ -183,16 +189,19 @@ class ApiTokenController extends Controller
     {
         // var_dump($field);
         // $d = '';
-        if($field == 'camara' || $field == 'fecha' || $field == 'centro') {
+        if ($field == 'camara' || $field == 'fecha' || $field == 'centro') {
             return "STRING";
-        } elseif ($field == 'sesiones_count' || 
-                  $field == 'fallas' || 
-                  $field == 'consumo' || 
-                  $field == 'tiempo_uso' || 
-                  $field == 'amperaje' || 
-                  $field == 'voltaje' || 
-                  $field == 'fallasVoltaje' || 
-                  $field == 'horasUso') {
+        } elseif (
+            $field == 'sesiones_count' ||
+            $field == 'fallas' ||
+            $field == 'consumo' ||
+            $field == 'tiempo_uso' ||
+            $field == 'hora' ||
+            $field == 'amperaje' ||
+            $field == 'voltaje' ||
+            $field == 'fallasVoltaje' ||
+            $field == 'horasUso'
+        ) {
             return 'NUMBER';
         }
         return '';
@@ -200,48 +209,48 @@ class ApiTokenController extends Controller
 
     public function reportes($iduser, $fechadesde, $fechahasta, $idreporte)
     {
-        $fecha_desde = chr(39).$fechadesde.chr(39);
-        $fecha_hasta = chr(39).$fechahasta.chr(39);
+        $fecha_desde = chr(39) . $fechadesde . chr(39);
+        $fecha_hasta = chr(39) . $fechahasta . chr(39);
         $centro = "NULL";
-		$camara = "NULL";
-		
-        $me = \DB::table('cms_users')->where('id',$iduser)->first();
-		$user = chr(39).$me->id.chr(39);
-		
-        $privilege = chr(39).$me->id_cms_privileges.chr(39);
+        $camara = "NULL";
+
+        $me = \DB::table('cms_users')->where('id', $iduser)->first();
+        $user = chr(39) . $me->id . chr(39);
+
+        $privilege = chr(39) . $me->id_cms_privileges . chr(39);
         // return json_encode($iduser);
         switch ($idreporte) {
-		
-			case '1':
-			    //horas deconsumo totales
 
-			    $sql = "call check_consumo(".$centro.", ".$camara.", ".$fecha_desde.", ".$fecha_hasta.",".$user.",".$privilege.");";
-			    
-			    /* echo($sql);
+            case '1':
+                //horas deconsumo totales
+
+                $sql = "call check_consumo(" . $centro . ", " . $camara . ", " . $fecha_desde . ", " . $fecha_hasta . "," . $user . "," . $privilege . ");";
+
+                /* echo($sql);
 			    exit(); */
-			    
-			    break;
-			case '2':
-			    //Fallas
 
-			    $sql = "call check_fallas(".$centro.", ".$camara.", ".$fecha_desde.", ".$fecha_hasta.",".$user.",".$privilege.");";
-			
-			    break;
-			
-			case '3':
-			    //Fallas
+                break;
+            case '2':
+                //Fallas
 
-			    $sql = "call check_fallas_voltaje(".$centro.", ".$camara.", ".$fecha_desde.", ".$fecha_hasta.",".$user.",".$privilege.");";
+                $sql = "call check_fallas(" . $centro . ", " . $camara . ", " . $fecha_desde . ", " . $fecha_hasta . "," . $user . "," . $privilege . ");";
 
-			    break;
-			
-			default:
-			    
-			    return response()->json([]);
-			    break;
-		}
-		
-		$result = \DB::select($sql);    
-		return json_encode($result);
+                break;
+
+            case '3':
+                //Fallas
+
+                $sql = "call check_fallas_voltaje(" . $centro . ", " . $camara . ", " . $fecha_desde . ", " . $fecha_hasta . "," . $user . "," . $privilege . ");";
+
+                break;
+
+            default:
+
+                return response()->json([]);
+                break;
+        }
+
+        $result = \DB::select($sql);
+        return json_encode($result);
     }
 }
