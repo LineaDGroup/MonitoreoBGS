@@ -50,7 +50,7 @@ class ApiTokenController extends Controller
 
     public function estadisticas(Request $request)
     {
-        \Log::info($request);
+        // \Log::info($request);
         $from = $request->dateRange['startDate'];
         $to = $request->dateRange['endDate'];
         // dd($request->userId);
@@ -95,6 +95,7 @@ class ApiTokenController extends Controller
             $array = $value->toArray();
             $array['camara'] = $value->camara->nombre;
             $array['centro'] = $value->camara->centro->descripcion;
+            $array['consumo'] = NULL;
             $array['fecha'] = Carbon::createFromTimeString($value->created_at)->format('Ymd');
             $array['hora'] = Carbon::createFromTimeString($value->created_at)->format('H');
             $array = array_map('strval', $array);
@@ -103,6 +104,21 @@ class ApiTokenController extends Controller
             $v = array('values' => $ar);
             array_push($rows, $v);
         }
+
+        // ADDED DATA FROM STORE_PROCEDURE
+        if(in_array(array('name' => "consumo"), $request->fields)) {
+            $reportesData = json_decode($this->reportes($request->userId, $from, $to, '1'));
+            foreach ($reportesData as $key => $value) {
+                $array = [];
+                sscanf($value->consumo_diario, "%d:%d:%d", $hours, $minutes, $seconds);
+                $time_seconds = isset($hours) ? $hours * 3600 + $minutes * 60 + $seconds : $minutes * 60 + $seconds;
+                $array['consumo'] = $time_seconds;
+                $ar = $this->getOrderedArray($array, array_values($request->fields));
+                $v = array('values' => $ar);
+                array_push($rows, $v);
+            }
+        }
+        // return response()->json(in_array(array('name' => "consumo"), $request->fields),200);
         $object = collect([
             'schema' => $schema,
             'rows' => $rows,
@@ -132,7 +148,11 @@ class ApiTokenController extends Controller
         foreach($ord as $key => $v) {
             // dd($v['name']);
             // $i = $v['name'];
-            $orderedarray[$key] = $array[$v] ;
+            if($array[$v] == NULL || $array[$v] == "") {
+                $orderedarray[$key] = NULL;
+            } else {
+                $orderedarray[$key] = $array[$v];
+            }
         }
 
         return $orderedarray;
@@ -171,5 +191,52 @@ class ApiTokenController extends Controller
             return 'NUMBER';
         }
         return '';
+    }
+
+    public function reportes($iduser, $fechadesde, $fechahasta, $idreporte)
+    {
+        $fecha_desde = chr(39).$fechadesde.chr(39);
+        $fecha_hasta = chr(39).$fechahasta.chr(39);
+        $centro = "NULL";
+		$camara = "NULL";
+		
+        $me = \DB::table('cms_users')->where('id',$iduser)->first();
+		$user = chr(39).$me->id.chr(39);
+		
+        $privilege = chr(39).$me->id_cms_privileges.chr(39);
+        // return json_encode($iduser);
+        switch ($idreporte) {
+		
+			case '1':
+			    //horas deconsumo totales
+
+			    $sql = "call check_consumo(".$centro.", ".$camara.", ".$fecha_desde.", ".$fecha_hasta.",".$user.",".$privilege.");";
+			    
+			    /* echo($sql);
+			    exit(); */
+			    
+			    break;
+			case '2':
+			    //Fallas
+
+			    $sql = "call check_fallas(".$centro.", ".$camara.", ".$fecha_desde.", ".$fecha_hasta.",".$user.",".$privilege.");";
+			
+			    break;
+			
+			case '3':
+			    //Fallas
+
+			    $sql = "call check_fallas_voltaje(".$centro.", ".$camara.", ".$fecha_desde.", ".$fecha_hasta.",".$user.",".$privilege.");";
+
+			    break;
+			
+			default:
+			    
+			    return response()->json([]);
+			    break;
+		}
+		
+		$result = \DB::select($sql);    
+		return json_encode($result);
     }
 }
