@@ -95,7 +95,7 @@ class ApiTokenController extends Controller
             $array = $value->toArray();
             $array['camara'] = $value->camara->nombre;
             $array['centro'] = $value->camara->centro->descripcion;
-            $array['consumo'] = NULL;
+            // $array['consumo'] = NULL;
             $array['fecha'] = Carbon::createFromTimeString($value->created_at)->format('Ymd');
             $array['hora'] = Carbon::createFromTimeString($value->created_at)->format('H');
             $array = array_map('strval', $array);
@@ -106,13 +106,13 @@ class ApiTokenController extends Controller
         }
 
         // ADDED DATA FROM STORE_PROCEDURE
-        if(in_array(array('name' => "consumo"), $request->fields)) {
+        if(in_array(array('name' => "tiempo_uso"), $request->fields)) {
             $reportesData = json_decode($this->reportes($request->userId, $from, $to, '1'));
             foreach ($reportesData as $key => $value) {
                 $array = [];
                 sscanf($value->consumo_diario, "%d:%d:%d", $hours, $minutes, $seconds);
                 $time_seconds = isset($hours) ? $hours * 3600 + $minutes * 60 + $seconds : $minutes * 60 + $seconds;
-                $array['consumo'] = $time_seconds;
+                $array['tiempo_uso'] = $time_seconds;
                 $ar = $this->getOrderedArray($array, array_values($request->fields));
                 $v = array('values' => $ar);
                 array_push($rows, $v);
@@ -184,6 +184,7 @@ class ApiTokenController extends Controller
         } elseif ($field == 'sesiones_count' || 
                   $field == 'fallas' || 
                   $field == 'consumo' || 
+                  $field == 'tiempo_uso' || 
                   $field == 'amperaje' || 
                   $field == 'voltaje' || 
                   $field == 'fallasVoltaje' || 
