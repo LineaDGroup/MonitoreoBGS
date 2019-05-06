@@ -189,7 +189,7 @@ class ApiTokenController extends Controller
     {
         // var_dump($field);
         // $d = '';
-        if ($field == 'camara' || $field == 'tiempo_uso' || $field == 'fecha' || $field == 'centro') {
+        if ($field == 'camara' || $field == 'fecha' || $field == 'centro') {
             return "STRING";
         } elseif (
             $field == 'sesiones_count' ||
@@ -199,7 +199,8 @@ class ApiTokenController extends Controller
             $field == 'amperaje' ||
             $field == 'voltaje' ||
             $field == 'fallasVoltaje' ||
-            $field == 'horasUso'
+            $field == 'horasUso' ||
+            $field == 'tiempo_uso'
         ) {
             return 'NUMBER';
         }
