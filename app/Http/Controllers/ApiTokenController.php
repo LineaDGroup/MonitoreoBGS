@@ -105,7 +105,7 @@ class ApiTokenController extends Controller
             }
         }
 
-        // ADDED DATA FROM STORE_PROCEDURE
+        // ADDED DATA FROM STORE_PROCEDURE 
         if (in_array(array('name' => "tiempo_uso"), $request->fields)) {
             $reportesData = json_decode($this->reportes($request->userId, $from, $to, '1'));
             foreach ($reportesData as $key => $value) {
@@ -113,6 +113,22 @@ class ApiTokenController extends Controller
                 sscanf($value->consumo_diario, "%d:%d:%d", $hours, $minutes, $seconds);
                 $time_seconds = isset($hours) ? $hours * 3600 + $minutes * 60 + $seconds : $minutes * 60 + $seconds;
                 $array['tiempo_uso'] = strval($time_seconds);
+                $array['camara'] = $value->nom_camara;
+                $array['centro'] = $value->desc_centro;
+                $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
+                $ar = $this->getOrderedArray($array, array_values($request->fields));
+                $v = array('values' => $ar);
+                array_push($rows, $v);
+            }
+        }
+
+        // ADDED DATA FROM STORE_PROCEDURE CHECK_FALLAS_VOLTAJE
+        if (in_array(array('name' => "fallasVoltaje"), $request->fields)) {
+            $reportesData = json_decode($this->reportes($request->userId, $from, $to, '3'));
+            dd($reportesData);
+            foreach ($reportesData as $key => $value) {
+                $array = [];
+                $array['fallasVoltaje'] = $value->count;
                 $array['camara'] = $value->nom_camara;
                 $array['centro'] = $value->desc_centro;
                 $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
