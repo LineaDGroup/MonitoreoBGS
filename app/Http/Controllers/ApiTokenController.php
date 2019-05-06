@@ -121,6 +121,34 @@ class ApiTokenController extends Controller
                 array_push($rows, $v);
             }
         }
+
+        // ADDED CAMARA, CENTRO O USUARIOS
+        $validacion = [array('name' => 'centro'), array('name' => 'camara'), array('name' => 'usuario')];
+        // Comprobamos que en REQUEST FIELDS tenemos solo camara, centro y/o usuario. 
+        $checkCamaras = array_map(function ($f) use ($validacion) {
+            return !in_array($f, $validacion);
+        }, $request->fields);
+        $onlyCamaras = !in_array(true, $checkCamaras);
+
+        if ($onlyCamaras) {
+            if (in_array(array('name' => "camara"), $request->fields) || in_array(array('name' => "centro"), $request->fields)) {
+
+                $camaras = Camara::where('id_cms_users',$request->userId)
+                ->with(['centro' => function ($q) {
+                    $q->select('id', 'descripcion');
+                }])
+                ->get();
+                foreach ($camaras as $key => $value) {
+                    $array = $value->toArray();
+                    $array['camara'] = $value->nombre;
+                    $array['centro'] = $value->centro->descripcion;
+                    $ar = $this->getOrderedArray($array, array_values($request->fields));
+                    $v = array('values' => $ar);
+                    array_push($rows, $v);
+                }
+            }
+        }
+
         // return response()->json($estadisticas, 200);
 
         $schema = array();
