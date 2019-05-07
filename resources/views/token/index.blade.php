@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", function(event) {
     document.getElementById('copyToken').addEventListener('click',function() {
         var copyText = document.getElementById("token").value;
         if (!navigator.clipboard) {
-            fallbackCopyTextToClipboard(copyText);
+            // fallbackCopyTextToClipboard(copyText);
             return;
         }
         navigator.clipboard.writeText(copyText).then(function() {

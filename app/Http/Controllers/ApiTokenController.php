@@ -128,9 +128,30 @@ class ApiTokenController extends Controller
             // dd($reportesData);
             foreach ($reportesData as $key => $value) {
                 $array = [];
-                $array['fallasVoltaje'] = $value->count;
+                $array['fallasVoltaje'] = strval($value->count);
                 $array['camara'] = $value->nom_camara;
                 $array['centro'] = $value->desc_centro;
+                $array['clase_falla_voltaje'] = $value->clase;
+
+                $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
+                $ar = $this->getOrderedArray($array, array_values($request->fields));
+                $v = array('values' => $ar);
+                array_push($rows, $v);
+            }
+        }
+
+
+        // ADDED DATA FROM STORE_PROCEDURE CHECK_FALLAS_VOLTAJE
+        if (in_array(array('name' => "fallas"), $request->fields)) {
+            $reportesData = json_decode($this->reportes($request->userId, $from, $to, '2'));
+            // dd($reportesData);
+            foreach ($reportesData as $key => $value) {
+                $array = [];
+                $array['fallas'] = strval($value->count);
+                $array['camara'] = $value->nom_camara;
+                $array['centro'] = $value->desc_centro;
+                $array['clase_falla'] = $value->clase;
+
                 $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
                 $ar = $this->getOrderedArray($array, array_values($request->fields));
                 $v = array('values' => $ar);
