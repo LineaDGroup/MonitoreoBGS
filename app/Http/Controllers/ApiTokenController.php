@@ -125,7 +125,7 @@ class ApiTokenController extends Controller
         // ADDED DATA FROM STORE_PROCEDURE CHECK_FALLAS_VOLTAJE
         if (in_array(array('name' => "fallasVoltaje"), $request->fields)) {
             $reportesData = json_decode($this->reportes($request->userId, $from, $to, '3'));
-            dd($reportesData);
+            // dd($reportesData);
             foreach ($reportesData as $key => $value) {
                 $array = [];
                 $array['fallasVoltaje'] = $value->count;
