@@ -254,7 +254,12 @@ class ApiTokenController extends Controller
     {
         // var_dump($field);
         // $d = '';
-        if ($field == 'camara' || $field == 'fecha' || $field == 'centro') {
+        if ($field == 'camara' || 
+            $field == 'fecha' || 
+            $field == 'centro' ||
+            $field == 'clase_falla' ||
+            $field == 'clase_falla_voltaje'
+            ) {
             return "STRING";
         } elseif (
             $field == 'sesiones_count' ||
