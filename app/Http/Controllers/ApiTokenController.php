@@ -63,6 +63,7 @@ class ApiTokenController extends Controller
             if (isset($from, $to)) {
                 $estadisticas = Estadistica::select('id', 'id_bio_camara', 'voltaje', 'consumo', 'created_at')
                     ->whereRaw("created_at >= ? AND created_at <= ?", array($from . " 00:00:00", $to . " 23:59:59"))
+                    ->where('consumo', '!=', 0)
                     ->whereHas('camara', function ($q) use ($request) {
                         $q->where('id_cms_users', $request->userId);
                     })
@@ -76,6 +77,7 @@ class ApiTokenController extends Controller
                     ->get();
             } else {
                 $estadisticas = Estadistica::select('id', 'id_bio_camara', 'voltaje', 'consumo', 'created_at')
+                    ->where('consumo', '!=', 0)
                     ->whereHas('camara', function ($q) use ($request) {
                         $q->where('id_cms_users', $request->userId);
                     })
@@ -170,11 +172,11 @@ class ApiTokenController extends Controller
         if ($onlyCamaras) {
             if (in_array(array('name' => "camara"), $request->fields) || in_array(array('name' => "centro"), $request->fields)) {
 
-                $camaras = Camara::where('id_cms_users',$request->userId)
-                ->with(['centro' => function ($q) {
-                    $q->select('id', 'descripcion');
-                }])
-                ->get();
+                $camaras = Camara::where('id_cms_users', $request->userId)
+                    ->with(['centro' => function ($q) {
+                        $q->select('id', 'descripcion');
+                    }])
+                    ->get();
                 foreach ($camaras as $key => $value) {
                     $array = $value->toArray();
                     $array['camara'] = $value->nombre;
@@ -254,12 +256,13 @@ class ApiTokenController extends Controller
     {
         // var_dump($field);
         // $d = '';
-        if ($field == 'camara' || 
-            $field == 'fecha' || 
+        if (
+            $field == 'camara' ||
+            $field == 'fecha' ||
             $field == 'centro' ||
             $field == 'clase_falla' ||
             $field == 'clase_falla_voltaje'
-            ) {
+        ) {
             return "STRING";
         } elseif (
             $field == 'sesiones_count' ||
