@@ -63,7 +63,7 @@ class ApiTokenController extends Controller
             if (isset($from, $to)) {
                 $estadisticas = Estadistica::select('id', 'id_bio_camara', 'voltaje', 'consumo', 'created_at')
                     ->whereRaw("created_at >= ? AND created_at <= ?", array($from . " 00:00:00", $to . " 23:59:59"))
-                    ->where('consumo', '!=', 0)
+                    ->where('consumo', '>=', 0.2)
                     ->whereHas('camara', function ($q) use ($request) {
                         $q->where('id_cms_users', $request->userId);
                     })
@@ -77,7 +77,7 @@ class ApiTokenController extends Controller
                     ->get();
             } else {
                 $estadisticas = Estadistica::select('id', 'id_bio_camara', 'voltaje', 'consumo', 'created_at')
-                    ->where('consumo', '!=', 0)
+                    ->where('consumo', '>=', 0.2)
                     ->whereHas('camara', function ($q) use ($request) {
                         $q->where('id_cms_users', $request->userId);
                     })
