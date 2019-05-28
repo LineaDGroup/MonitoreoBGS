@@ -23,3 +23,5 @@ Route::group(['middleware' => 'jwt.auth'], function () {
     Route::post('/usuarios', 'ApiTokenController@usuarios');
     Route::post('/estadisticas', 'ApiTokenController@estadisticas');
 });
+
+Route::get('/medirFallas','ApiTokenController@medirFallas');

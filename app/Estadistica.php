@@ -15,7 +15,8 @@ class Estadistica extends Model
         'hora',
         'voltaje',
         'consumo',
-        'free'
+        'free',
+        'tipoFalla'
     ];
 
     protected $with = [];

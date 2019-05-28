@@ -22,6 +22,7 @@ class Camara extends Model
         'domingo',
         'id_bio_zona_horaria',
         'amperaje_promedio',
+        'minutosRegistrados',
         'mail',
         'voltaje',
         'id_cms_users'
