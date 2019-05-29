@@ -20,4 +20,5 @@ Route::group([
     'prefix' => config('crudbooster.ADMIN_PATH')
 ], function () {
     Route::get('apitoken','ApiTokenController@getToken');
+    Route::get('bio_camara/{id}/reset','ApiTokenController@resetCamara');
 });

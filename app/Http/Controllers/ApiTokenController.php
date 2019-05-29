@@ -327,35 +327,47 @@ class ApiTokenController extends Controller
         $voltaje = request('voltaje');
         
         $camara = Camara::where('id_mac',$mac)->first();
-
+        $minutosRegistrados = $camara->minutosRegistrados;
         // Con fecha, hora y camara podemos obtener la estadistica y actualizarla. 
         $estadistica = Estadistica::where('fecha',$fecha)
         ->where('hora',$hora)
         ->where('id_bio_camara',$camara->id)
         ->first();
-        if(isset($estadistica)) {
-            $falla = abs($consumo - $camara->amperaje_promedio)/$camara->amperaje_promedio;
-            if($falla > 0.2) {
-                echo "danger";
-            } elseif($falla  > 0.1) {
-                echo "warning";
+        if($consumo > 0.2) {
+            // Si la camara tiene menos de 10 horas registradas sumamos el CONSUMO al amperaje_promedio            
+            if($minutosRegistrados == null || $minutosRegistrados < 600) 
+            {
+                
+                $porc = ($camara->amperaje_promedio*($minutosRegistrados/5)+$consumo)/(($minutosRegistrados/5)+1);
+                $camara->amperaje_promedio += $porc;
+                
+                $porcVoltaje = ($camara->voltaje*($minutosRegistrados/5)+$voltaje)/(($minutosRegistrados/5)+1);
+                $camara->voltaje += $porcVoltaje;
+                
+                $camara->minutosRegistrados += 5;  
+                $camara->save(); 
+                echo "PORCENTAJE:" . $porc;
+                    
+            } else {
+                $falla = abs($consumo - $camara->amperaje_promedio)/$camara->amperaje_promedio;
+                if($falla > 0.2) {
+                    echo "danger";
+                } elseif($falla  > 0.1) {
+                    echo "warning";
+                }
             }
-        }
-
-        // Si la camara tiene menos de 10 horas registradas sumamos el CONSUMO al amperaje_promedio
-        $minutosRegistrados = $camara->minutosRegistrados; 
-        // dd($minutosRegistrados);
-        if($consumo > 0.2 && ($minutosRegistrados == null || $minutosRegistrados < 600)) {
-            $porc = ($camara->amperaje_promedio*($minutosRegistrados/5)+$consumo)/(($minutosRegistrados/5)+1);
-            $camara->amperaje_promedio += $porc;
-            $camara->minutosRegistrados += 5;  
-            $camara->save(); 
-            echo "PORCENTAJE:" . $porc;
         }
 
         // VOLTAJE
         // $fallaVoltaje = ((((220+110)/2) - $voltaje) / $voltaje) * 100;
         // echo "Falla voltaje" . $fallaVoltaje; 
         exit;
+    }
+
+    public function resetCamara($id)
+    {
+        Camara::find($id)->update(['minutosRegistrados' => null,'voltaje' => null, 'amperaje_promedio'=> null]);
+        // return "true";
+        return redirect('/admin/bio_camara');
     }
 }
