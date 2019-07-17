@@ -333,7 +333,7 @@ class ApiTokenController extends Controller
         ->where('hora',$hora)
         ->where('id_bio_camara',$camara->id)
         ->first();
-        if($consumo > 0.2) {
+        if($consumo > 1) {
             // Si la camara tiene menos de 10 horas registradas sumamos el CONSUMO al amperaje_promedio            
             if($minutosRegistrados == null || $minutosRegistrados < 600) 
             {
@@ -349,19 +349,36 @@ class ApiTokenController extends Controller
                 echo "PORCENTAJE:" . $porc;
                     
             } else {
-                $falla = abs($consumo - $camara->amperaje_promedio)/$camara->amperaje_promedio;
-                if($falla > 0.2) {
-                    echo "danger";
-                } elseif($falla  > 0.1) {
+                $c = $consumo * $voltaje; 
+                $promedio = $camara->amperaje_promedio * $camara->voltaje; 
+                $falla = abs($c - $promedio)/$promedio;
+                if($falla > 0.05) {
                     echo "warning";
+                    $estadistica->tipoFalla = 'warning';
+
+                } elseif($falla  > 0.1) {
+                    echo "danger";
+                    $estadistica->tipoFalla = 'danger';
                 }
+                $estadistica->save();
             }
         }
 
         // VOLTAJE
         // $fallaVoltaje = ((((220+110)/2) - $voltaje) / $voltaje) * 100;
         // echo "Falla voltaje" . $fallaVoltaje; 
-        exit;
+        return response()->json(['msg' => 'Success']);
+    }
+    public function medirFallasPrueba()
+    {
+        //http://localhost/biobarica/service/post.php?mac=33:44:55:88:aa:ff&fecha=220917&hora=000200&voltaje=224&consumo=0.00
+       echo request('mac');
+       echo request('fecha');
+       echo request('hora');
+       echo request('consumo');
+       echo request('voltaje');
+
+       exit;
     }
 
     public function resetCamara($id)
