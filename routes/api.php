@@ -25,3 +25,4 @@ Route::group(['middleware' => 'jwt.auth'], function () {
 });
 
 Route::get('/medirFallas','ApiTokenController@medirFallas');
+Route::get('/medirFallasPrueba','ApiTokenController@medirFallasPrueba');
