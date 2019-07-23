@@ -109,7 +109,8 @@
 	        | @showIf 	   = If condition when action show. Use field alias. e.g : [id] == 1
 	        | 
 	        */
-	        $this->addaction = array();
+			$this->addaction = array();
+			$this->addaction[] = ['label'=>'Reset','icon'=>'','color'=>'default','url'=>CRUDBooster::mainpath('').'/[id]/reset'];
 
 
 	        /* 

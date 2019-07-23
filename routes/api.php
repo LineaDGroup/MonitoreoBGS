@@ -16,3 +16,13 @@ use Illuminate\Http\Request;
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+Route::post('auth/login', 'ApiTokenController@login');
+// Route::get('/estadisticas', 'ApiTokenController@estadisticas');
+Route::group(['middleware' => 'jwt.auth'], function () {
+    Route::post('/usuarios', 'ApiTokenController@usuarios');
+    Route::post('/estadisticas', 'ApiTokenController@estadisticas');
+});
+
+Route::get('/medirFallas','ApiTokenController@medirFallas');
+Route::get('/medirFallasPrueba','ApiTokenController@medirFallasPrueba');
