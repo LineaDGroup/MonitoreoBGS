@@ -54,6 +54,7 @@ return [
       'center_admin' => 'Admin de Centros',
       'device_admin' => 'Admin de Dispositivos',
       'parameters' => 'Parámetros',
+      'api_token' => 'Api Token',
 
       'days' => [
         'monday' => 'Lunes',

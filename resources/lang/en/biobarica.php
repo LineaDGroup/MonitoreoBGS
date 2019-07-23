@@ -54,6 +54,7 @@ return [
       'center_admin' => 'Center Admin',
       'device_admin' => 'Device Admin',
       'parameters' => 'Parameters',
+      'api_token' => 'Api Token',
 
       'days' => [
         'monday' => 'Monday',
