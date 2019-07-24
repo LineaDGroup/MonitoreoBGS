@@ -97,8 +97,12 @@ class ApiTokenController extends Controller
                 $array['camara'] = $value->camara->nombre;
                 $array['centro'] = $value->camara->centro->descripcion;
                 // $array['consumo'] = NULL;
-                $array['fecha'] = Carbon::createFromTimeString($value->created_at)->format('Ymd');
-                $array['hora'] = Carbon::createFromTimeString($value->created_at)->format('H');
+                if(isset($value->created_at)) {
+                    $array['fecha'] = Carbon::createFromTimeString($value->created_at)->format('Ymd');
+                    $array['hora'] = Carbon::createFromTimeString($value->created_at)->format('H');
+                }
+                $array['fecha'] = $array['hora'] = null;
+
                 $array = array_map('strval', $array);
                 //    dd( array_values($request->fields));
                 $ar = $this->getOrderedArray($array, array_values($request->fields));
@@ -117,7 +121,12 @@ class ApiTokenController extends Controller
                 $array['tiempo_uso'] = strval($time_seconds);
                 $array['camara'] = $value->nom_camara;
                 $array['centro'] = $value->desc_centro;
-                $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
+                if(isset($value->fecha)) {
+                    $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
+                }
+                else {
+                    $array['fecha'] = null;
+                }
                 $ar = $this->getOrderedArray($array, array_values($request->fields));
                 $v = array('values' => $ar);
                 array_push($rows, $v);
@@ -135,7 +144,12 @@ class ApiTokenController extends Controller
                 $array['centro'] = $value->desc_centro;
                 $array['clase_falla_voltaje'] = $value->clase;
 
-                $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
+                if(isset($value->fecha)) {
+                    $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
+                }
+                else {
+                    $array['fecha'] = null;
+                }
                 $ar = $this->getOrderedArray($array, array_values($request->fields));
                 $v = array('values' => $ar);
                 array_push($rows, $v);
@@ -154,7 +168,13 @@ class ApiTokenController extends Controller
                 $array['centro'] = $value->desc_centro;
                 $array['clase_falla'] = $value->clase;
 
-                $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
+                // $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
+                if(isset($value->fecha)) {
+                    $array['fecha'] = Carbon::createFromFormat('Y-m-d', $value->fecha)->format('Ymd');
+                }
+                else {
+                    $array['fecha'] = null;
+                }
                 $ar = $this->getOrderedArray($array, array_values($request->fields));
                 $v = array('values' => $ar);
                 array_push($rows, $v);
