@@ -98,8 +98,8 @@ class ApiTokenController extends Controller
                 $array['centro'] = $value->camara->centro->descripcion;
                 // $array['consumo'] = NULL;
                 if(isset($value->created_at)) {
-                    $array['fecha'] = Carbon::createFromTimeString($value->created_at)->format('Ymd');
-                    $array['hora'] = Carbon::createFromTimeString($value->created_at)->format('H');
+                    $array['fecha'] = Carbon::createFromFormat('Y-m-d H:i:s',$value->created_at)->format('Ymd');
+                    $array['hora'] = Carbon::createFromFormat('Y-m-d H:i:s',$value->created_at)->format('H');
                 }
                 $array['fecha'] = $array['hora'] = null;
 
