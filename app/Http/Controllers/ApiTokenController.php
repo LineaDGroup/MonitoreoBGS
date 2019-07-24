@@ -100,9 +100,9 @@ class ApiTokenController extends Controller
                 if(isset($value->created_at)) {
                     $array['fecha'] = Carbon::createFromFormat('Y-m-d H:i:s',$value->created_at)->format('Ymd');
                     $array['hora'] = Carbon::createFromFormat('Y-m-d H:i:s',$value->created_at)->format('H');
-                }
-                $array['fecha'] = $array['hora'] = null;
-
+                } else {
+                    $array['fecha'] = $array['hora'] = null;
+                }    
                 $array = array_map('strval', $array);
                 //    dd( array_values($request->fields));
                 $ar = $this->getOrderedArray($array, array_values($request->fields));
