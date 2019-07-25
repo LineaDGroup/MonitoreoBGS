@@ -48,7 +48,7 @@ return [
       'timezone' => 'Time Zone',
       'users' => 'Users',
       'value' => 'Value',
-
+      'voltaje_fabrica' => 'Nominal Voltaje', 
       //menus
       'statistics_records' => 'Statistics Records',
       'center_admin' => 'Center Admin',

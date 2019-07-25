@@ -25,6 +25,7 @@ class Camara extends Model
         'minutosRegistrados',
         'mail',
         'voltaje',
+        'voltaje_fabrica',
         'id_cms_users'
     ];
 

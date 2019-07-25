@@ -53,7 +53,8 @@
 			}
 			$this->form[] = ['label'=>trans('biobarica.labels.description'),'name'=>'descripcion','type'=>'text','validation'=>'required|min:1|max:200','width'=>'6'];
 			$this->form[] = ['label'=>trans('biobarica.labels.averageamperage'),'name'=>'id_bio_zona_horaria','type'=>'select2','validation'=>'required','width'=>'6','datatable'=>'bio_zona_horaria,zona'];
-			
+			$this->form[] = ['label'=>trans('biobarica.labels.voltaje_fabrica'),'name'=>'voltaje_fabrica','type'=>'select','validation'=>'required','width'=>'6','dataenum'=>'110|110;220|220'];
+
 			$this->form[] = array("label"=>trans('biobarica.labels.dailyhoursav'),"type"=>"header", "name"=>"lunes");
 			
 			$this->form[] = ['label'=> trans('biobarica.labels.days.monday'),'id'=>'lunes', 'name'=>'lunes','type'=>'number','validation'=>'required|min:0|max:24','width'=>'2' ];

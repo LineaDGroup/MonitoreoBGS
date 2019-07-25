@@ -48,7 +48,7 @@ return [
       'timezone' => 'Zona Horaria',
       'users' => 'Usuarios',
       'value' => 'Valor',
-
+      'voltaje_fabrica' => 'voltaje nominal del equipo',
       //menus
       'statistics_records' => 'Reporte de Estadísticas',
       'center_admin' => 'Admin de Centros',
