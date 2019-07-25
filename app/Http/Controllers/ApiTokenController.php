@@ -182,7 +182,7 @@ class ApiTokenController extends Controller
         }
 
         // ADDED CAMARA, CENTRO O USUARIOS
-        $validacion = [array('name' => 'centro'), array('name' => 'camara'), array('name' => 'usuario')];
+        $validacion = [array('name' => 'centro'), array('name' => 'camara'),array('name' => 'voltaje_promedio'),array('name' => 'consumo_promedio'), array('name' => 'usuario')];
         // Comprobamos que en REQUEST FIELDS tenemos solo camara, centro y/o usuario. 
         $checkCamaras = array_map(function ($f) use ($validacion) {
             return !in_array($f, $validacion);
@@ -201,6 +201,8 @@ class ApiTokenController extends Controller
                     $array = $value->toArray();
                     $array['camara'] = $value->nombre;
                     $array['centro'] = $value->centro->descripcion;
+                    $array['voltaje_promedio'] = $value->voltaje;
+                    $array['consumo_promedio'] = $value->amperaje_promedio;
                     $ar = $this->getOrderedArray($array, array_values($request->fields));
                     $v = array('values' => $ar);
                     array_push($rows, $v);
@@ -291,6 +293,8 @@ class ApiTokenController extends Controller
             $field == 'hora' ||
             $field == 'amperaje' ||
             $field == 'voltaje' ||
+            $field == 'voltaje_promedio' ||
+            $field == 'consumo_promedio' ||
             $field == 'fallasVoltaje' ||
             $field == 'horasUso' ||
             $field == 'tiempo_uso'
