@@ -69,3 +69,9 @@ To access [Google Data Studio](https://datastudio.google.com/u/0/navigation/repo
 To access you'll need you API key.
 
 After logging in to the BGS Monitor backend enter the API key section. You API key will be available and you can copy it to use it in [this step](#access-the-detailed-report) 
+
+
+## Important information
+
+### [Privacy Policy](https://biobarica.com/profesionales/politica-de-privacidad)
+### [Terms of Service](https://biobarica.com/profesionales/aviso-legal)
