@@ -79,8 +79,10 @@ After logging in to the BGS Monitor backend enter the API key section. You API k
 ## Get Support
 
 <form action="https://formspree.io/soporte@biobarica.com" method="POST">
- <label for="name">Name:</label><input type="text" name="name"><br>
-  <label for="_replyto">Email:</label><input type="email" name="_replyto"><br>
- <label for="subject">Sibject:</label><input type="textarea" name="subject"><br>
+ <label for="name">Name:&nbsp;</label><input type="text" name="name"><br>
+  <label for="_replyto">Email:&nbsp;</label><input type="email" name="_replyto"><br>
+ <label for="subject">Subject:&nbsp;</label><textarea name="subject" rows="10" cols="30">
+Write your question here.
+</textarea><br>
   <input type="submit" value="Send">
 </form>
