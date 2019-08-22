@@ -75,3 +75,11 @@ After logging in to the BGS Monitor backend enter the API key section. You API k
 
 ### [Privacy Policy](https://biobarica.com/profesionales/politica-de-privacidad)
 ### [Terms of Service](https://biobarica.com/profesionales/aviso-legal)
+
+## Get Support
+
+<form action="https://formspree.io/soporte@biobarica.com" method="POST">
+  <input type="text" name="name">
+  <input type="email" name="_replyto">
+  <input type="submit" value="Send">
+</form>
